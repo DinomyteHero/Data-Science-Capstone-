@@ -1,0 +1,47 @@
+Capstone Presentation
+========================================================
+author: Louis Bouwer
+date: 8 January 2021
+width: 1440
+height: 900
+
+Introduction
+========================================================
+This is the Coursera Capstone Project for the Data Science Specialization from John Hopkins University.
+For this Project, I had to develop a word prediction app based on text data which originated from Swiftkey.
+
+[Link to Data Science Program] (https://www.coursera.org/specializations/jhu-data-science)
+
+[Swiftkey Data] (https://d396qusza40orc.cloudfront.net/dsscapstone/dataset/Coursera-SwiftKey.zip)
+
+
+Methodology 
+========================================================
+Here is the steps that I took in creating the word prediction application:
+
+1. I first input the datasets and then it was needed to create a sample size of 15% to narrow down the data to a smaller amount. Clean up the sample from swear words, numbers, urls, etc.
+2. I create an corpora using the quanteda library and created ngrams from it.(Unigram,Bigram,Trigram,Quadgram). Four document term matrix (dtm) was created from the ngrams.
+3. After making the dtm's I used the colSums function to make data frames which included the frequencies of the different ngrams. I used these frequencies to create probabilities for the different ngram values in the data frames.
+4. I created a prediction algorithm using the probability datasets. This algorithm is also able to clean the user input.
+5. The Shiny App was created with the user input on the sidebar panel and the prediction algorithm output being displayed on the main panel.
+
+The Algorithm
+========================================================
+
+1. Reads the input.
+2. Cleans the input using self made cleaning function.
+3. Calculates length of sentence using ntoken function.
+4. Uses the length of sentence to see if an quadgram, trigram, or bigram prediction should be used.
+5. If no matches can be found then the most frequent unigram words are used.
+6. The three most probable matches are returned to the user.
+
+
+
+How to Operate the App
+========================================================
+
+All you need to do is to input words in the block inside the blue circle and the predictions will be given to you in the block shown inside the green circle.
+
+```{r, echo=FALSE}
+   knitr::include_graphics('./Data Science Capstone App2.JPG')
+```

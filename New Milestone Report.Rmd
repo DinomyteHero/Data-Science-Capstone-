@@ -1,0 +1,87 @@
+---
+title: "New Milestone Report"
+author: "Louis"
+date: "12/31/2020"
+output: beamer_presentation
+fontsize: 10pt
+---
+
+# Coursera Milestone Report
+
+I did had to do data analysis and data exploration for this report.
+
+## Step 1: Loading the Data
+
+```{r}
+library(slam)
+library(ngram)
+library(dplyr)
+library(tidyr)
+library(stringi)
+library(ggplot2)
+library(tm)
+twitter_data <- readLines("en_US.twitter.txt", skipNul = TRUE)
+blog_data <- readLines("en_US.blogs.txt", skipNul = TRUE)
+news_data <- readLines("en_US.news.txt", skipNul = TRUE)
+```
+
+## Step 2: Manipulating the Data
+
+```{r}
+blog_word_count <- wordcount(blog_data)
+news_word_count <- wordcount(news_data)
+twitter_word_count <- wordcount(twitter_data)
+
+total_word_count <- c(blog_word_count, news_word_count, twitter_word_count)
+df_twc <- data.frame(total_word_count)
+
+colnames(df_twc) <- "Total Word Count"
+row.names(df_twc) <- c("Blog", "News", "Twitter")
+```
+
+## Step 3: Creating Sample Sizes and Making a Corpus
+
+```{r}
+# Sample Size
+Smpl <- 0.01
+blog_smpl <- sample(seq_len(length(blog_data)),length(blog_data)*Smpl)
+news_smpl <- sample(seq_len(length(news_data)),length(news_data)*Smpl)
+twitter_smpl <- sample(seq_len(length(twitter_data)),length(twitter_data)*Smpl)
+
+blog_data1 <- blog_data[blog_smpl[]]
+news_data1 <- news_data[news_smpl[]]
+twitter_data1 <- twitter_data[twitter_smpl[]]
+
+# Make Corpus using the sample size
+Corp <- Corpus(VectorSource(c(blog_data1, news_data1, twitter_data1)),readerControl=list(reader=readPlain,language="en"))
+Corp <- Corpus(VectorSource(sapply(Corp, function(row) iconv(row, "latin1", "ASCII", sub=""))))
+Corp <- tm_map(Corp, removePunctuation)
+Corp <- tm_map(Corp, stripWhitespace) 
+Corp <- tm_map(Corp, content_transformer(tolower)) 
+Corp <- tm_map(Corp, removeNumbers) 
+Corp <- tm_map(Corp, PlainTextDocument) 
+Corp <- Corpus(VectorSource(Corp))
+
+```
+
+## Step 4: Create Plots to illistrate the data
+
+```{r}
+control_corp <-TermDocumentMatrix(Corp,control=list(minWordLength=1))
+wordFrequency <-rowapply_simple_triplet_matrix(control_corp,sum)
+wordFrequency <-wordFrequency[order(wordFrequency,decreasing=T)]
+mostFrequent25 <-as.data.frame(wordFrequency[1:25])
+mostFrequent25 <-data.frame(Words = row.names(mostFrequent25),mostFrequent25)
+names(mostFrequent25)[2] = "Frequency"
+row.names(mostFrequent25) <-NULL
+plot_1 <- ggplot(data=mostFrequent25, aes(x=Words, y=Frequency, fill=Frequency)) + geom_bar(stat="identity") +  guides(fill=FALSE) + theme(axis.text.x=element_text(angle=90))
+# mf30Plot +labs(title="30 Most Frequently Used Words")
+plot_1 + ggtitle("25 Most Used Words")
+
+# Make a plot with a smaller amount of words to better illistrate most used words
+mostFrequent5 <-head(mostFrequent25,5)
+mostFrequent5
+plot_2 <- ggplot(data = mostFrequent5, aes(x=Words, y = Frequency)) + geom_bar(stat = "identity") + ggtitle("5 Most Used Words")
+plot_2
+```
+
